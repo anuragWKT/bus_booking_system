@@ -3,7 +3,8 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import IntroScreen from '../screens/IntroScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
-import {AuthStackParamList} from './types'; 
+import AvailableBusesScreen from '../screens/AvailableBusesScreen';
+import {AuthStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
@@ -21,6 +22,11 @@ function AuthNavigator(): JSX.Element {
       />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
+      <Stack.Screen
+        name="AvailableBuses"
+        component={AvailableBusesScreen}
+        options={{title: 'Available Buses'}}
+      />
     </Stack.Navigator>
   );
 }

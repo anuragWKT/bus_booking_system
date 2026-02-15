@@ -1,13 +1,17 @@
 import React from 'react';
-import {SafeAreaView, StatusBar, StyleSheet, Text, View} from 'react-native';
+import {StatusBar} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import AuthNavigator from './src/navigation/AuthNavigator';
 
 function App(): JSX.Element {
   return (
-    <SafeAreaView >
-      <View>
-        <Text>Bus Booking App</Text>
-      </View>
-    </SafeAreaView>
+    <SafeAreaProvider>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      <NavigationContainer>
+        <AuthNavigator />
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 

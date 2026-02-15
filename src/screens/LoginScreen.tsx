@@ -37,7 +37,10 @@ function LoginScreen({navigation}: Props): JSX.Element {
     );
 
     if (loginUser.fulfilled.match(resultAction)) {
-      navigation.replace('AvailableBuses');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'AvailableBuses'}],
+      });
     }
   };
 

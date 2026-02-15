@@ -11,7 +11,10 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {AuthStackParamList} from '../navigation/types';
 import {Bus} from '../types';
 import {useAppDispatch, useAppSelector} from '../store/hooks';
-import {fetchBuses} from '../store/slices/busesSlice';
+import {logout} from '../store/slices/authSlice';
+import {clearBusesState, fetchBuses} from '../store/slices/busesSlice';
+import {clearBookingState} from '../store/slices/bookingsSlice';
+import {clearUserTripsState} from '../store/slices/userTripsSlice';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'AvailableBuses'>;
 
@@ -22,6 +25,18 @@ function AvailableBusesScreen({navigation}: Props): JSX.Element {
   useEffect(() => {
     dispatch(fetchBuses());
   }, [dispatch]);
+
+  const onLogout = () => {
+    dispatch(logout());
+    dispatch(clearBusesState());
+    dispatch(clearBookingState());
+    dispatch(clearUserTripsState());
+
+    navigation.reset({
+      index: 0,
+      routes: [{name: 'Intro'}],
+    });
+  };
 
   const renderBusCard = ({item}: {item: Bus}) => (
     <TouchableOpacity
@@ -42,7 +57,7 @@ function AvailableBusesScreen({navigation}: Props): JSX.Element {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={styles.loadingText}>Loading buses...</Text>
+        <Text style={styles.loadingText}>Fetching available buses...</Text>
       </View>
     );
   }
@@ -50,7 +65,9 @@ function AvailableBusesScreen({navigation}: Props): JSX.Element {
   if (error && buses.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorText}>
+          {error || 'Unable to load buses right now. Please try again.'}
+        </Text>
         <TouchableOpacity
           style={styles.retryButton}
           activeOpacity={0.8}
@@ -70,7 +87,31 @@ function AvailableBusesScreen({navigation}: Props): JSX.Element {
         renderItem={renderBusCard}
         refreshing={isLoading}
         onRefresh={() => dispatch(fetchBuses())}
-        ListHeaderComponent={<Text style={styles.title}>Available Buses</Text>}
+        ListHeaderComponent={
+          <View style={styles.headerContainer}>
+            <Text style={styles.title}>Available Buses</Text>
+            <View style={styles.actionRow}>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={[styles.actionButton, styles.upcomingButton]}
+                onPress={() => navigation.navigate('UpcomingTrips')}>
+                <Text style={styles.actionButtonText}>Upcoming Trips</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={[styles.actionButton, styles.historyButton]}
+                onPress={() => navigation.navigate('BookingHistory')}>
+                <Text style={styles.actionButtonText}>Booking History</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                activeOpacity={0.85}
+                style={[styles.actionButton, styles.logoutButton]}
+                onPress={onLogout}>
+                <Text style={styles.actionButtonText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        }
         ListEmptyComponent={<Text style={styles.emptyText}>No buses available right now.</Text>}
       />
     </View>
@@ -90,7 +131,34 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
     color: '#0F172A',
+    marginBottom: 10,
+  },
+  headerContainer: {
     marginBottom: 12,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  actionButton: {
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginRight: 8,
+    marginBottom: 8,
+  },
+  upcomingButton: {
+    backgroundColor: '#2563EB',
+  },
+  historyButton: {
+    backgroundColor: '#0EA5E9',
+  },
+  logoutButton: {
+    backgroundColor: '#DC2626',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
   card: {
     borderRadius: 12,
@@ -141,6 +209,7 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     marginTop: 20,
+    lineHeight: 20,
   },
 });
 

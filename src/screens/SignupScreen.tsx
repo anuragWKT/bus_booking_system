@@ -44,7 +44,10 @@ function SignupScreen({navigation}: Props): JSX.Element {
     );
 
     if (signupUser.fulfilled.match(resultAction)) {
-      navigation.replace('AvailableBuses');
+      navigation.reset({
+        index: 0,
+        routes: [{name: 'AvailableBuses'}],
+      });
     }
   };
 

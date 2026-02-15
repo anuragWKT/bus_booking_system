@@ -31,7 +31,13 @@ export const fetchBuses = createAsyncThunk<Bus[], void, {rejectValue: string}>(
 const busesSlice = createSlice({
   name: 'buses',
   initialState,
-  reducers: {},
+  reducers: {
+    clearBusesState(state) {
+      state.buses = [];
+      state.isLoading = false;
+      state.error = null;
+    },
+  },
   extraReducers: builder => {
     builder
       .addCase(fetchBuses.pending, state => {
@@ -50,4 +56,5 @@ const busesSlice = createSlice({
   },
 });
 
+export const {clearBusesState} = busesSlice.actions;
 export default busesSlice.reducer;

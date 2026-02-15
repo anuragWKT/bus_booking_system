@@ -5,6 +5,8 @@ import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import AvailableBusesScreen from '../screens/AvailableBusesScreen';
 import BusDetailsScreen from '../screens/BusDetailsScreen';
+import UpcomingTripsScreen from '../screens/UpcomingTripsScreen';
+import BookingHistoryScreen from '../screens/BookingHistoryScreen';
 import {AuthStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -26,12 +28,22 @@ function AuthNavigator(): JSX.Element {
       <Stack.Screen
         name="AvailableBuses"
         component={AvailableBusesScreen}
-        options={{title: 'Available Buses'}}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="BusDetails"
         component={BusDetailsScreen}
         options={{title: 'Bus Details'}}
+      />
+      <Stack.Screen
+        name="UpcomingTrips"
+        component={UpcomingTripsScreen}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="BookingHistory"
+        component={BookingHistoryScreen}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

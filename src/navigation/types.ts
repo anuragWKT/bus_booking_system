@@ -4,5 +4,7 @@ export type AuthStackParamList = {
   Signup: undefined;
   AvailableBuses: undefined;
   BusDetails: {busId: string};
+  UpcomingTrips: undefined;
+  BookingHistory: undefined;
 };
  

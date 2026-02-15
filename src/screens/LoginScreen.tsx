@@ -1,16 +1,12 @@
-import React, {useMemo, useState} from 'react';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, {useState} from 'react';
+import {KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import AppButton from '../components/AppButton';
+import AppTextInput from '../components/AppTextInput';
 import {AuthStackParamList} from '../navigation/types';
 import {useAppDispatch, useAppSelector} from '../store/hooks';
 import {clearAuthError, loginUser} from '../store/slices/authSlice';
+import {validateLoginForm} from '../utils/validation';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
@@ -21,15 +17,12 @@ function LoginScreen({navigation}: Props): JSX.Element {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-
-  const canSubmit = useMemo(
-    () => email.trim().length > 0 && password.trim().length > 0,
-    [email, password],
-  );
+  const canSubmit = email.trim().length > 0 && password.trim().length > 0;
 
   const onLoginPress = async () => {
-    if (!canSubmit) {
-      setFormError('Please enter both email and password');
+    const validationError = validateLoginForm(email, password);
+    if (validationError) {
+      setFormError(validationError);
       return;
     }
 
@@ -49,47 +42,45 @@ function LoginScreen({navigation}: Props): JSX.Element {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Welcome back</Text>
+        <Text style={styles.subtitle}>Log in to continue booking your bus tickets.</Text>
+
+        <AppTextInput
         value={email}
         onChangeText={text => setEmail(text)}
         placeholder="Email"
-        placeholderTextColor="#94A3B8"
         autoCapitalize="none"
         keyboardType="email-address"
       />
 
-      <TextInput
-        style={styles.input}
+        <AppTextInput
         value={password}
         onChangeText={text => setPassword(text)}
         placeholder="Password"
-        placeholderTextColor="#94A3B8"
         secureTextEntry
       />
 
-      {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={[styles.button, !canSubmit || isLoading ? styles.buttonDisabled : null]}
+        <AppButton
+          title="Login"
+          isLoading={isLoading}
+          disabled={!canSubmit}
         onPress={onLoginPress}
-        disabled={!canSubmit || isLoading}>
-        {isLoading ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text style={styles.buttonText}>Login</Text>
-        )}
-      </TouchableOpacity>
+        />
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        onPress={() => navigation.navigate('Signup')}>
-        <Text style={styles.linkText}>Don&apos;t have an account? Sign up</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => navigation.navigate('Signup')}>
+          <Text style={styles.linkText}>Don&apos;t have an account? Sign up</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -97,42 +88,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F8FAFC',
     paddingHorizontal: 24,
+  },
+  card: {
+    borderRadius: 14,
+    padding: 18,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: '#0F172A',
-    marginBottom: 20,
+    marginBottom: 6,
   },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginBottom: 12,
-    backgroundColor: '#FFFFFF',
-    color: '#0F172A',
-  },
-  button: {
-    marginTop: 4,
-    width: '100%',
-    borderRadius: 10,
-    paddingVertical: 14,
-    backgroundColor: '#2563EB',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
+  subtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    marginBottom: 16,
   },
   errorText: {
     width: '100%',

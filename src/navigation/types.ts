@@ -3,5 +3,6 @@ export type AuthStackParamList = {
   Login: undefined;
   Signup: undefined;
   AvailableBuses: undefined;
+  BusDetails: {busId: string};
 };
  

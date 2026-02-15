@@ -4,6 +4,7 @@ import IntroScreen from '../screens/IntroScreen';
 import LoginScreen from '../screens/LoginScreen';
 import SignupScreen from '../screens/SignupScreen';
 import AvailableBusesScreen from '../screens/AvailableBusesScreen';
+import BusDetailsScreen from '../screens/BusDetailsScreen';
 import {AuthStackParamList} from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -26,6 +27,11 @@ function AuthNavigator(): JSX.Element {
         name="AvailableBuses"
         component={AvailableBusesScreen}
         options={{title: 'Available Buses'}}
+      />
+      <Stack.Screen
+        name="BusDetails"
+        component={BusDetailsScreen}
+        options={{title: 'Bus Details'}}
       />
     </Stack.Navigator>
   );

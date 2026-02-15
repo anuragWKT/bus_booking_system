@@ -1,16 +1,12 @@
-import React, {useMemo, useState} from 'react';
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, {useState} from 'react';
+import {KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import AppButton from '../components/AppButton';
+import AppTextInput from '../components/AppTextInput';
 import {AuthStackParamList} from '../navigation/types';
 import {useAppDispatch, useAppSelector} from '../store/hooks';
 import {clearAuthError, signupUser} from '../store/slices/authSlice';
+import {validateSignupForm} from '../utils/validation';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
@@ -24,18 +20,13 @@ function SignupScreen({navigation}: Props): JSX.Element {
   const [phone, setPhone] = useState('');
   const [pic, setPic] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
-
-  const canSubmit = useMemo(
-    () =>
-      name.trim().length > 0 &&
-      email.trim().length > 0 &&
-      password.trim().length > 0,
-    [name, email, password],
-  );
+  const canSubmit =
+    name.trim().length > 0 && email.trim().length > 0 && password.trim().length > 0;
 
   const onSignupPress = async () => {
-    if (!canSubmit) {
-      setFormError('Name, email and password are required');
+    const validationError = validateSignupForm({name, email, password, pic});
+    if (validationError) {
+      setFormError(validationError);
       return;
     }
 
@@ -58,72 +49,62 @@ function SignupScreen({navigation}: Props): JSX.Element {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Signup Screen</Text>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={styles.container}>
+      <View style={styles.card}>
+        <Text style={styles.title}>Create account</Text>
+        <Text style={styles.subtitle}>Sign up to start booking your next trip.</Text>
 
-      <TextInput
-        style={styles.input}
+        <AppTextInput
         value={name}
         onChangeText={setName}
         placeholder="Name"
-        placeholderTextColor="#94A3B8"
       />
 
-      <TextInput
-        style={styles.input}
+        <AppTextInput
         value={email}
         onChangeText={setEmail}
         placeholder="Email"
-        placeholderTextColor="#94A3B8"
         autoCapitalize="none"
         keyboardType="email-address"
       />
 
-      <TextInput
-        style={styles.input}
+        <AppTextInput
         value={password}
         onChangeText={setPassword}
         placeholder="Password"
-        placeholderTextColor="#94A3B8"
         secureTextEntry
       />
 
-      <TextInput
-        style={styles.input}
+        <AppTextInput
         value={phone}
         onChangeText={setPhone}
         placeholder="Phone (optional)"
-        placeholderTextColor="#94A3B8"
       />
 
-      <TextInput
-        style={styles.input}
+        <AppTextInput
         value={pic}
         onChangeText={setPic}
         placeholder="Profile picture URL (optional)"
-        placeholderTextColor="#94A3B8"
         autoCapitalize="none"
       />
 
-      {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        {formError ? <Text style={styles.errorText}>{formError}</Text> : null}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-      <TouchableOpacity
-        activeOpacity={0.8}
-        style={[styles.button, !canSubmit || isLoading ? styles.buttonDisabled : null]}
+        <AppButton
+          title="Sign Up"
+          isLoading={isLoading}
+          disabled={!canSubmit}
         onPress={onSignupPress}
-        disabled={!canSubmit || isLoading}>
-        {isLoading ? (
-          <ActivityIndicator color="#FFFFFF" />
-        ) : (
-          <Text style={styles.buttonText}>Sign Up</Text>
-        )}
-      </TouchableOpacity>
+        />
 
-      <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.linkText}>Already have an account? Log in</Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity activeOpacity={0.8} onPress={() => navigation.navigate('Login')}>
+          <Text style={styles.linkText}>Already have an account? Log in</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -131,42 +112,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     backgroundColor: '#F8FAFC',
     paddingHorizontal: 24,
+  },
+  card: {
+    borderRadius: 14,
+    padding: 18,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
     color: '#0F172A',
-    marginBottom: 20,
+    marginBottom: 6,
   },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginBottom: 12,
-    backgroundColor: '#FFFFFF',
-    color: '#0F172A',
-  },
-  button: {
-    marginTop: 4,
-    width: '100%',
-    borderRadius: 10,
-    paddingVertical: 14,
-    backgroundColor: '#2563EB',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-    textAlign: 'center',
+  subtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    marginBottom: 16,
   },
   errorText: {
     width: '100%',

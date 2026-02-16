@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import {AuthStackParamList} from '../navigation/types';
 import {useAppDispatch, useAppSelector} from '../store/hooks';
+import {cancelBooking} from '../store/slices/bookingsSlice';
+import {fetchBuses} from '../store/slices/busesSlice';
 import {fetchUserTrips} from '../store/slices/userTripsSlice';
 import {Booking} from '../types';
 
@@ -20,6 +22,7 @@ function UpcomingTripsScreen({}: Props): JSX.Element {
   const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.auth);
   const {upcomingTrips, isLoading, error} = useAppSelector(state => state.userTrips);
+  const {isBooking, bookingError} = useAppSelector(state => state.bookings);
 
   const loadTrips = useCallback(() => {
     if (user?.id) {
@@ -33,6 +36,15 @@ function UpcomingTripsScreen({}: Props): JSX.Element {
     }, [loadTrips]),
   );
 
+  const onCancelBooking = async (bookingId: string) => {
+    const resultAction = await dispatch(cancelBooking(bookingId));
+
+    if (cancelBooking.fulfilled.match(resultAction)) {
+      loadTrips();
+      dispatch(fetchBuses());
+    }
+  };
+
   const renderTripCard = ({item}: {item: Booking}) => {
     const routeName = item.bus ? `${item.bus.from} --> ${item.bus.to}` : 'Route unavailable';
     const departure = item.bus ? item.bus.timeFrom : '-';
@@ -44,6 +56,13 @@ function UpcomingTripsScreen({}: Props): JSX.Element {
         <Text style={styles.metaText}>Departure: {departure}</Text>
         <Text style={styles.metaText}>Seats: {item.numberOfSeats}</Text>
         <Text style={styles.metaText}>Total Price: ${totalPrice}</Text>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          style={[styles.cancelButton, isBooking ? styles.cancelButtonDisabled : null]}
+          onPress={() => onCancelBooking(item.id)}
+          disabled={isBooking}>
+          <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+        </TouchableOpacity>
       </View>
     );
   };
@@ -83,6 +102,7 @@ function UpcomingTripsScreen({}: Props): JSX.Element {
 
   return (
     <View style={styles.container}>
+      {bookingError ? <Text style={styles.bannerErrorText}>{bookingError}</Text> : null}
       <FlatList
         data={upcomingTrips}
         keyExtractor={item => item.id}
@@ -120,6 +140,22 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E2E8F0',
   },
+  cancelButton: {
+    marginTop: 10,
+    alignSelf: 'flex-start',
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#DC2626',
+  },
+  cancelButtonDisabled: {
+    opacity: 0.6,
+  },
+  cancelButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 13,
+  },
   routeText: {
     fontSize: 17,
     fontWeight: '700',
@@ -146,6 +182,12 @@ const styles = StyleSheet.create({
     color: '#DC2626',
     textAlign: 'center',
     marginBottom: 12,
+  },
+  bannerErrorText: {
+    color: '#DC2626',
+    textAlign: 'center',
+    paddingTop: 10,
+    paddingHorizontal: 16,
   },
   retryButton: {
     borderRadius: 10,

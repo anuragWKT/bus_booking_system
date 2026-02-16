@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
-import {bookTicketsApi} from '../../services/bookingApi';
+import {bookTicketsApi, cancelBookingApi} from '../../services/bookingApi';
 import {Booking} from '../../types';
 
 type BookTicketsPayload = {
@@ -35,6 +35,20 @@ export const bookTickets = createAsyncThunk<
   }
 });
 
+export const cancelBooking = createAsyncThunk<Booking, string, {rejectValue: string}>(
+  'bookings/cancelBooking',
+  async (bookingId, {rejectWithValue}) => {
+    try {
+      const booking = await cancelBookingApi(bookingId);
+      return booking;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Unable to cancel booking right now';
+      return rejectWithValue(message);
+    }
+  },
+);
+
 const bookingsSlice = createSlice({
   name: 'bookings',
   initialState,
@@ -59,6 +73,19 @@ const bookingsSlice = createSlice({
       .addCase(bookTickets.rejected, (state, action) => {
         state.isBooking = false;
         state.bookingError = action.payload ?? 'Booking failed';
+      })
+      .addCase(cancelBooking.pending, state => {
+        state.isBooking = true;
+        state.bookingError = null;
+      })
+      .addCase(cancelBooking.fulfilled, (state, action) => {
+        state.isBooking = false;
+        state.bookingError = null;
+        state.lastBooking = action.payload;
+      })
+      .addCase(cancelBooking.rejected, (state, action) => {
+        state.isBooking = false;
+        state.bookingError = action.payload ?? 'Cancel failed';
       });
   },
 });

@@ -6,4 +6,5 @@ export const API_PATHS = {
   buses: `${API_PREFIX}/buses`,
   users: `${API_PREFIX}/users`,
   bookTickets: `${API_PREFIX}/bookings/book`,
+  cancelBooking: (bookingId: string) => `${API_PREFIX}/bookings/cancel/${bookingId}`,
 };
